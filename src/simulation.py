@@ -4,7 +4,7 @@ import pandas as pd
 
 def run_simulation(df):
     # 1. User mortgage input
-    loan_amount = float(input("What is you mortgage amount (PLN): "))
+    loan_amount = float(input("What is your mortgage amount (PLN): "))
     loan_years = int(input("How many years will you be paying it: "))
     bank_margin = float(input("What is the bank margin in %: ")) / 100
     overpayment_pln = float(
@@ -32,15 +32,10 @@ def run_simulation(df):
     interest_paid_std = 0
     interest_paid_a = 0
 
-    # Strategy A (Lower Monthly Payment - Option 2):
-    # Tracks ETF units bought using money saved from smaller monthly payments.
-    # When you overpay and lower your monthly bill, your required bank payment drops.
-    # Monthly cash savings (Old Payment - New Payment) are invested in ETFs.
+    # Strategy A (Lower Monthly Payment / Shorten Term)
     etf_units_a = 0
 
-    # Strategy B (ETF Investing):
-    # Tracks ETF units bought using your FULL EXTRA BUDGET (e.g., 1,000 PLN/month).
-    # You do not overpay the loan at all—all extra cash goes straight into ETFs.
+    # Strategy B (ETF Investing)
     etf_units_b = 0
 
     # 2. Main Simulation Loop
@@ -71,7 +66,6 @@ def run_simulation(df):
                 pmt_a = pmt_std
 
             principal_a = pmt_a - interest_a
-            # Cap overpayment so balance doesn't go below 0
             actual_overpay = min(
                 overpayment_pln, max(0, balance_a - principal_a)
             )
@@ -89,11 +83,9 @@ def run_simulation(df):
 
     # Strategy A: ETF Portfolio + Belka Tax (19%)
     gross_a = (etf_units_a * final_etf_price) * eur_pln_rate
-    # Simplified net profit calculation from original code
     invested_a_pln = gross_a
     net_etf_val_a = gross_a - (max(0, gross_a - invested_a_pln) * 0.19)
 
-    # Net financial gain of Strategy A: (Debt reduced compared to standard) + ETF Portfolio
     equity_gained_a = (balance_std - balance_a) + net_etf_val_a
 
     # Strategy B: ETF Portfolio + Belka Tax (19%)
@@ -121,7 +113,7 @@ def run_simulation(df):
         print(f"VERDICT: Strategy A (Overpayment) wins by {abs(diff):,.2f} PLN")
 
 
-# Script entry point for standalone execution
+# Script entry point for interactive user execution
 if __name__ == "__main__":
     csv_path = (
         Path(__file__).resolve().parents[1] / "data" / "clean_merged_data.csv"
@@ -130,4 +122,4 @@ if __name__ == "__main__":
         df_clean = pd.read_csv(csv_path, index_col=0, parse_dates=True)
         run_simulation(df_clean)
     else:
-        print("Please run pipeline.py first to generate clean_merged_data.csv!")
+        print("Data file not found. Please run pipeline.py first to generate clean_merged_data.csv!")
