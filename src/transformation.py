@@ -61,7 +61,7 @@ def transform_etf_data(df_etf_raw):
     # Keep only Close column and rename it to etf_price
     df_etf = keep_columns(df_etf, ["Close"])
     df_etf = column_rename(df_etf, {"Close": "etf_price"})
-    df_etf.index = pd.to_datetime(df_etf.index).astype("datetime64[ns]")
+    df_etf.index = pd.to_datetime(df_etf.index).tz_localize(None).normalize()
     return df_etf.sort_index()
   
 
@@ -78,7 +78,7 @@ def transform_wibor_data(df_wibor_raw):
     df_wibor.set_index("Data", inplace=True)
     df_wibor["wibor_3m"] = df_wibor["wibor_3m"] / 100
 
-    df_wibor.index = pd.to_datetime(df_wibor.index).astype("datetime64[ns]")
+    df_wibor.index = pd.to_datetime(df_wibor.index).tz_localize(None).normalize()
     return df_wibor.sort_index()
 
 
