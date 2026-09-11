@@ -1,0 +1,11 @@
+# Python bytecode and cache folders
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Virtual environment
+.venv/
