@@ -10,11 +10,6 @@ import yfinance as yf
 def fetch_etf_data(ticker="VWCE.DE", start_date="2016-01-01"):
     # Download historical ETF market data from Yahoo Finance
     df_etf = yf.download(ticker, start=start_date, auto_adjust=True)
-
-    # Flatten MultiIndex columns returned by yfinance to allow standard Pandas merging
-    if isinstance(df_etf.columns, pd.MultiIndex):
-        df_etf.columns = df_etf.columns.get_level_values(0)
-
     return transform_etf_data(df_etf)
 
 
@@ -57,11 +52,18 @@ def convert_to_datetime(df, date_column):
 
 def transform_etf_data(df_etf_raw):
     """Clean and transform daily raw ETF data."""
+    df_etf = df_etf_raw.copy()
+
+    # Flatten MultiIndex columns returned by yfinance if present
+    if isinstance(df_etf.columns, pd.MultiIndex):
+        df_etf.columns = df_etf.columns.get_level_values(0)
+
     # Keep only Close column and rename it to etf_price
-    df_etf = keep_columns (df_etf_raw, ["Close"])
+    df_etf = keep_columns(df_etf, ["Close"])
     df_etf = column_rename(df_etf, {"Close": "etf_price"})
     df_etf.index = pd.to_datetime(df_etf.index).astype("datetime64[ns]")
     return df_etf.sort_index()
+  
 
 def transform_wibor_data(df_wibor_raw):
     """Clean, format, and scale daily raw WIBOR data."""
