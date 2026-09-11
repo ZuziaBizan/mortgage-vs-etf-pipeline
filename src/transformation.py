@@ -15,7 +15,7 @@ def fetch_etf_data(ticker="VWCE.DE", start_date="2016-01-01"):
     if isinstance(df_etf.columns, pd.MultiIndex):
         df_etf.columns = df_etf.columns.get_level_values(0)
 
-    return df_etf
+    return transform_etf_data(df_etf)
 
 
 def load_wibor_data(file_path=None):
@@ -26,7 +26,7 @@ def load_wibor_data(file_path=None):
 
     # Read raw WIBOR historical interest rates from local CSV file
     df_wibor = pd.read_csv(file_path)
-    return df_wibor
+    return transform_wibor_data(df_wibor)
 
 
 # ==========================================
@@ -34,7 +34,7 @@ def load_wibor_data(file_path=None):
 # ==========================================
 
 
-def drop_unnecessary_columns(df, columns_to_keep):
+def keep_columns (df, columns_to_keep):
     # Keep only specified columns in the DataFrame
     return df[columns_to_keep]
 
@@ -58,10 +58,10 @@ def convert_to_datetime(df, date_column):
 def transform_etf_data(df_etf_raw):
     """Clean and transform daily raw ETF data."""
     # Keep only Close column and rename it to etf_price
-    df_etf = drop_unnecessary_columns(df_etf_raw, ["Close"])
+    df_etf = keep_columns (df_etf_raw, ["Close"])
     df_etf = column_rename(df_etf, {"Close": "etf_price"})
-    return df_etf
-
+    df_etf.index = pd.to_datetime(df_etf.index).astype("datetime64[ns]")
+    return df_etf.sort_index()
 
 def transform_wibor_data(df_wibor_raw):
     """Clean, format, and scale daily raw WIBOR data."""
@@ -69,14 +69,16 @@ def transform_wibor_data(df_wibor_raw):
     df_wibor = convert_to_datetime(df_wibor_raw, "Data")
 
     # Keep required columns and rename interest rate column
-    df_wibor = drop_unnecessary_columns(df_wibor, ["Data", "Zamkniecie"])
+    df_wibor = keep_columns(df_wibor, ["Data", "Zamkniecie"])
     df_wibor = column_rename(df_wibor, {"Zamkniecie": "wibor_3m"})
 
     # Set date as index and convert percentage values to decimals (e.g. 5.5% -> 0.055)
     df_wibor.set_index("Data", inplace=True)
     df_wibor["wibor_3m"] = df_wibor["wibor_3m"] / 100
 
-    return df_wibor
+    df_wibor.index = pd.to_datetime(df_wibor.index).astype("datetime64[ns]")
+    return df_wibor.sort_index()
+
 
 
 # ==========================================
