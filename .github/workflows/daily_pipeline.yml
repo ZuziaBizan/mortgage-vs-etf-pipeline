@@ -28,10 +28,13 @@ jobs:
       - name: Run ETL Data Pipeline
         run: python src/pipeline.py
 
-      - name: Commit and push updated clean data
-        run: |
+            - name: Commit and push updated clean data
+            
+      -  run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
           git add data/clean_merged_data.csv
           git commit -m "auto: update financial data [skip ci]" || exit 0
+          git pull --rebase origin main
           git push
