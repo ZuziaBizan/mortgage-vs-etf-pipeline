@@ -12,40 +12,13 @@ def run_pipeline():
     df_wibor = tr.load_wibor_data()
 
     print("3. Merging Daily ETF with Latest Available WIBOR...")
-
-    # FIX: Reset index to explicitly force matching datetime64[ns] dtypes on columns
-    df_etf = df_etf.reset_index()
-    df_wibor = df_wibor.reset_index()
-
-    # Identify date column names (typically 'Date' or 'Data')
-    date_col_etf = df_etf.columns[0]
-    date_col_wibor = df_wibor.columns[0]
-
-    # Explicitly enforce nanosecond datetime precision
-    df_etf[date_col_etf] = pd.to_datetime(df_etf[date_col_etf]).astype(
-        "datetime64[ns]"
-    )
-    df_wibor[date_col_wibor] = pd.to_datetime(df_wibor[date_col_wibor]).astype(
-        "datetime64[ns]"
-    )
-
-    # Ensure datasets are sorted by date before asof merge
-    df_etf = df_etf.sort_values(by=date_col_etf)
-    df_wibor = df_wibor.sort_values(by=date_col_wibor)
-
-    # Perform backward asof merge on explicit date columns
     df_merged = pd.merge_asof(
         df_etf,
         df_wibor,
-        left_on=date_col_etf,
-        right_on=date_col_wibor,
+        left_index=True,
+        right_index=True,
         direction="backward",
     ).dropna()
-
-    # Restore primary date index and clean up redundant date columns
-    df_merged.set_index(date_col_etf, inplace=True)
-    if date_col_wibor in df_merged.columns:
-        df_merged.drop(columns=[date_col_wibor], inplace=True)
 
     print("4. Validating merged data...")
     if not tr.validate_data(df_merged):

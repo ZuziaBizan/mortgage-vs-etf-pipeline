@@ -29,7 +29,7 @@ def load_wibor_data(file_path=None):
 # ==========================================
 
 
-def keep_columns (df, columns_to_keep):
+def keep_columns(df, columns_to_keep):
     # Keep only specified columns in the DataFrame
     return df[columns_to_keep]
 
@@ -61,9 +61,11 @@ def transform_etf_data(df_etf_raw):
     # Keep only Close column and rename it to etf_price
     df_etf = keep_columns(df_etf, ["Close"])
     df_etf = column_rename(df_etf, {"Close": "etf_price"})
-    df_etf.index = pd.to_datetime(df_etf.index).tz_localize(None).normalize()
+    
+    # Enforce seconds precision explicitly at the source
+    df_etf.index = pd.to_datetime(df_etf.index).tz_localize(None).normalize().astype("datetime64[s]")
     return df_etf.sort_index()
-  
+
 
 def transform_wibor_data(df_wibor_raw):
     """Clean, format, and scale daily raw WIBOR data."""
@@ -78,9 +80,9 @@ def transform_wibor_data(df_wibor_raw):
     df_wibor.set_index("Data", inplace=True)
     df_wibor["wibor_3m"] = df_wibor["wibor_3m"] / 100
 
-    df_wibor.index = pd.to_datetime(df_wibor.index).tz_localize(None).normalize()
+    # Enforce seconds precision explicitly at the source
+    df_wibor.index = pd.to_datetime(df_wibor.index).tz_localize(None).normalize().astype("datetime64[s]")
     return df_wibor.sort_index()
-
 
 
 # ==========================================
