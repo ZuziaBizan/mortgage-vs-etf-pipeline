@@ -12,13 +12,6 @@ def run_pipeline():
     df_wibor = tr.load_wibor_data()
 
     print("3. Merging Daily ETF with Latest Available WIBOR...")
-
-    df_etf = df_etf.sort_index()
-    df_wibor = df_wibor.sort_index()
-
-    df_etf.index = pd.to_datetime(df_etf.index).as_unit("us")
-    df_wibor.index = pd.to_datetime(df_wibor.index).as_unit("us")
-
     df_merged = pd.merge_asof(
         df_etf,
         df_wibor,
@@ -26,6 +19,7 @@ def run_pipeline():
         right_index=True,
         direction="backward",
     ).dropna()
+
 
     print("4. Validating merged data...")
     if not tr.validate_data(df_merged):
