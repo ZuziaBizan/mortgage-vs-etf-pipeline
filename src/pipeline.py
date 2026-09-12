@@ -16,8 +16,8 @@ def run_pipeline():
     df_etf = df_etf.sort_index()
     df_wibor = df_wibor.sort_index()
 
-    df_etf.index = pd.to_datetime(df_etf.index).astype("datetime64[ns]")
-    df_wibor.index = pd.to_datetime(df_wibor.index).astype("datetime64[ns]")
+    df_etf.index = pd.to_datetime(df_etf.index).as_unit("us")
+    df_wibor.index = pd.to_datetime(df_wibor.index).as_unit("us")
 
     df_merged = pd.merge_asof(
         df_etf,
