@@ -32,8 +32,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git pull --rebase origin main
           git add data/clean_merged_data.csv
           git commit -m "auto: update financial data [skip ci]" || exit 0
+          git pull --rebase origin main
           git push
