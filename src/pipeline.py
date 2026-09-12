@@ -15,9 +15,9 @@ def run_pipeline():
     df_wibor = tr.transform_wibor_data(df_wibor_raw)
 
     print("4. Merging Daily ETF with Latest Available WIBOR...")
-    # Convert to datetime and normalize to same unit (microseconds)
-    df_etf.index = pd.to_datetime(df_etf.index).as_unit('us')
-    df_wibor.index = pd.to_datetime(df_wibor.index).as_unit('us')
+    # Normalize both indices to datetime64[s] (seconds) - the common baseline
+    df_etf.index = pd.DatetimeIndex(df_etf.index).as_unit('s')
+    df_wibor.index = pd.DatetimeIndex(df_wibor.index).as_unit('s')
 
     # Sort indices before merging
     df_etf = df_etf.sort_index()
