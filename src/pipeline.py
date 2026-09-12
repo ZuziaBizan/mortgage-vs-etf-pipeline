@@ -1,50 +1,42 @@
 from pathlib import Path
 import pandas as pd
+import simulation as sim
 import transformation as tr
 
 
 def run_pipeline():
-    print("1. Fetching ETF data...")
-    df_etf_raw = tr.fetch_etf_data()
+    print("1. Fetching & transforming ETF data...")
+    df_etf = tr.fetch_etf_data()
 
-    print("2. Loading WIBOR data...")
-    df_wibor_raw = tr.load_wibor_data()
+    print("2. Loading & transforming WIBOR data...")
+    df_wibor = tr.load_wibor_data()
 
-    print("3. Transforming raw datasets...")
-    df_etf = tr.transform_etf_data(df_etf_raw)
-    df_wibor = tr.transform_wibor_data(df_wibor_raw)
-
-    print("4. Merging Daily ETF with Latest Available WIBOR...")
-    # Normalize both indices to datetime64[us] (microseconds) - preserves higher precision
-    df_etf.index = df_etf.index.astype('datetime64[us]')
-    df_wibor.index = df_wibor.index.astype('datetime64[us]')
-
-    # Sort indices before merging
-    df_etf = df_etf.sort_index()
-    df_wibor = df_wibor.sort_index()
-
-    # Perform backward ASOF merge
+    print("3. Merging Daily ETF with Latest Available WIBOR...")
     df_merged = pd.merge_asof(
-        df_etf,
-        df_wibor,
+        df_etf.sort_index(),
+        df_wibor.sort_index(),
         left_index=True,
         right_index=True,
         direction="backward",
     ).dropna()
 
-    # Validating Clean Data
-    print("5. Validating merged data...")
+    print("4. Validating merged data...")
     if not tr.validate_data(df_merged):
         raise ValueError("Data validation failed. Aborting pipeline process.")
 
-    # Save to CSV after successful validation
+    # Save clean dataset to CSV
     base_dir = Path(__file__).resolve().parents[1]
     output_path = base_dir / "data" / "clean_merged_data.csv"
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     df_merged.to_csv(output_path)
 
-    print(f"Done! Pipeline finished successfully. Data saved to: {output_path}")
+    print(
+        f"Done! Pipeline finished successfully. Data saved to: {output_path}\n"
+    )
+
+    # Automatically trigger interactive simulation using the merged dataset
+    sim.run_simulation(df_merged)
 
 
 if __name__ == "__main__":
