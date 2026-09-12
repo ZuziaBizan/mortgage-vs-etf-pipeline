@@ -11,14 +11,13 @@ def run_pipeline():
     df_wibor_raw = tr.load_wibor_data()
 
     print("3. Transforming raw datasets...")
-    # Tutaj dołączamy brakujące wywołania transformacji danych
     df_etf = tr.transform_etf_data(df_etf_raw)
     df_wibor = tr.transform_wibor_data(df_wibor_raw)
 
     print("4. Merging Daily ETF with Latest Available WIBOR...")
-    # Standardize datetime precision
-    df_etf.index = pd.to_datetime(df_etf.index).astype("datetime64[ns]")
-    df_wibor.index = pd.to_datetime(df_wibor.index).astype("datetime64[ns]")
+    # Convert to datetime and normalize to same unit (microseconds)
+    df_etf.index = pd.to_datetime(df_etf.index).as_unit('us')
+    df_wibor.index = pd.to_datetime(df_wibor.index).as_unit('us')
 
     # Sort indices before merging
     df_etf = df_etf.sort_index()
