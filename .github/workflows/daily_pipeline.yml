@@ -11,7 +11,6 @@ permissions:
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -19,12 +18,12 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.11' 
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas yfinance
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; else pip install pandas yfinance; fi
 
       - name: Run ETL Data Pipeline
         run: python src/pipeline.py
