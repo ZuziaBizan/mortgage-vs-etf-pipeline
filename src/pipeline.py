@@ -1,5 +1,6 @@
 from pathlib import Path
 import pandas as pd
+import simulation as sim
 import transformation as tr
 
 
@@ -11,17 +12,9 @@ def run_pipeline():
     df_wibor = tr.load_wibor_data()
 
     print("3. Merging Daily ETF with Latest Available WIBOR...")
-
-    # Jednolite wymuszenie typu nanosekund bez stref czasowych
-    df_etf.index = pd.to_datetime(df_etf.index).astype("datetime64[ns]")
-    df_wibor.index = pd.to_datetime(df_wibor.index).astype("datetime64[ns]")
-
-    df_etf = df_etf.sort_index()
-    df_wibor = df_wibor.sort_index()
-
     df_merged = pd.merge_asof(
-        df_etf,
-        df_wibor,
+        df_etf.sort_index(),
+        df_wibor.sort_index(),
         left_index=True,
         right_index=True,
         direction="backward",
@@ -29,10 +22,9 @@ def run_pipeline():
 
     print("4. Validating merged data...")
     if not tr.validate_data(df_merged):
-        print("Stopping pipeline due to invalid data.")
-        return
+        raise ValueError("Data validation failed. Aborting pipeline process.")
 
-    # Save to CSV only after successful validation
+    # Save clean dataset to CSV
     base_dir = Path(__file__).resolve().parents[1]
     output_path = base_dir / "data" / "clean_merged_data.csv"
 
@@ -42,7 +34,9 @@ def run_pipeline():
     print(
         f"Done! Pipeline finished successfully. Data saved to: {output_path}\n"
     )
-    print(df_merged.head())
+
+    # Automatically trigger interactive simulation using the merged dataset
+    sim.run_simulation(df_merged)
 
 
 if __name__ == "__main__":
