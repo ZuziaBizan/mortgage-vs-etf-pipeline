@@ -12,6 +12,10 @@ def run_pipeline():
     df_wibor = tr.load_wibor_data()
 
     print("3. Merging Daily ETF with Latest Available WIBOR...")
+
+    df_etf.index = pd.to_datetime(df_etf.index).astype("datetime64[ns]")
+    df_wibor.index = pd.to_datetime(df_wibor.index).astype("datetime64[ns]")
+    
     df_merged = pd.merge_asof(
         df_etf,
         df_wibor,
