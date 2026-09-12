@@ -11,13 +11,17 @@ def run_pipeline():
     print("2. Loading & transforming WIBOR data...")
     df_wibor = tr.load_wibor_data()
 
+    print("3. Merging Daily ETF with Latest Available WIBOR...")
+
+    df_etf = df_etf.sort_index()
+    df_wibor = df_wibor.sort_index()
+
     df_etf.index = pd.to_datetime(df_etf.index).astype("datetime64[ns]")
     df_wibor.index = pd.to_datetime(df_wibor.index).astype("datetime64[ns]")
 
-    print("3. Merging Daily ETF with Latest Available WIBOR...")
     df_merged = pd.merge_asof(
-        df_etf.sort_index(),
-        df_wibor.sort_index(),
+        df_etf,
+        df_wibor,
         left_index=True,
         right_index=True,
         direction="backward",
