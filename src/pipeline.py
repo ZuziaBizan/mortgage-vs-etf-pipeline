@@ -13,8 +13,8 @@ def run_pipeline():
 
     print("3. Merging Daily ETF with Latest Available WIBOR...")
     df_merged = pd.merge_asof(
-        df_etf,
-        df_wibor,
+        df_etf.sort_index(),
+        df_wibor.sort_index(),
         left_index=True,
         right_index=True,
         direction="backward",
