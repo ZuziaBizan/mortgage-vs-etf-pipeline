@@ -34,5 +34,5 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add data/clean_merged_data.csv
           git commit -m "auto: update financial data [skip ci]" || exit 0
-          git pull --rebase origin main
-          git push
+          git pull --rebase origin main || git merge --abort
+          git push || true
