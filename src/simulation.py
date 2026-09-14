@@ -21,9 +21,9 @@ def run_simulation(df):
     eur_pln_rate = 4.30
     total_months = loan_years * 12
 
-    # Resample dataset directly from input DataFrame
-    monthly_rates_m = (df["wibor_3m"].resample("ME").last() + bank_margin) / 12
-    etf_prices = df["etf_price"].resample("ME").last()
+    # Resample dataset directly from input DataFrame (using 'me' for month end)
+    monthly_rates_m = (df["wibor_3m"].resample("me").last() + bank_margin) / 12
+    etf_prices = df["etf_price"].resample("me").last()
     simulation_months = min(total_months, len(monthly_rates_m))
 
     # Initial mortgage balances and tracking variables
@@ -115,11 +115,17 @@ def run_simulation(df):
 
 # Script entry point for interactive user execution
 if __name__ == "__main__":
-    csv_path = (
-        Path(__file__).resolve().parents[1] / "data" / "clean_merged_data.csv"
-    )
+    base_dir = Path(__file__).resolve().parents[1]
+    csv_path = base_dir / "data" / "clean_merged_data.csv"
+
+    # Fallback to current working directory if not found in root relative path
+    if not csv_path.exists():
+        csv_path = Path("data/clean_merged_data.csv")
+
     if csv_path.exists():
         df_clean = pd.read_csv(csv_path, index_col=0, parse_dates=True)
         run_simulation(df_clean)
     else:
-        print("Data file not found. Please run pipeline.py first to generate clean_merged_data.csv!")
+        print(
+            "Data file not found. Please run pipeline.py first to generate clean_merged_data.csv!"
+        )

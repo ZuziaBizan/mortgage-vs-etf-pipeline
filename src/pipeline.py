@@ -1,6 +1,5 @@
 from pathlib import Path
 import pandas as pd
-import simulation as sim
 import transformation as tr
 
 
@@ -34,10 +33,6 @@ def run_pipeline():
     print(
         f"Done! Pipeline finished successfully. Data saved to: {output_path}\n"
     )
-
-    # Automatically trigger interactive simulation using the merged dataset
-    sim.run_simulation(df_merged)
-
 
 if __name__ == "__main__":
     run_pipeline()
